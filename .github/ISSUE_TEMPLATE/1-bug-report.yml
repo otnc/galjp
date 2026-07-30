@@ -1,0 +1,38 @@
+name: 🐛 バグ報告
+description: 修正すべき不具合を報告する
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        バグ報告ありがとうございます。galjp をより良くするために役立ちます。
+
+        できるだけ多くの情報を含めていただけると助かります。
+  - type: input
+    attributes:
+      label: 使用している galjp のバージョンは？
+      placeholder: 5.0.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 実行環境（ランタイム/プラットフォーム）は？できればバージョンも
+      placeholder: Node.js、Deno、Bun、Cloudflare Workers、ブラウザ、CLI など
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 再現手順を教えてください
+      description: バグの内容と、再現できるコードスニペット（または `galjp` コマンド）を書いてください。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 期待していた動作は？
+  - type: textarea
+    attributes:
+      label: 実際にはどうなりましたか？
+  - type: textarea
+    attributes:
+      label: その他の情報
+      description: 他に伝えておきたいことがあれば書いてください。

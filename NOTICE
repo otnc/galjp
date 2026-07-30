@@ -1,0 +1,33 @@
+galjp
+Copyright (c) otoneko.
+Licensed under the ISC License (see LICENSE).
+
+このプロダクトには、以下のサードパーティ由来のデータが含まれています。
+下記のライセンスは、それぞれの派生データファイルに適用されるものであり、galjp 自体のコードには適用されません。
+（原文の著作権表示は、法的な正確性を保つため英語のまま記載しています。）
+
+--------------------------------------------------------------------------------
+KanjiVG
+--------------------------------------------------------------------------------
+Copyright (c) 2009-2026 Ulrich Apel.
+Licensed under the Creative Commons Attribution-Share Alike 3.0 licence.
+https://kanjivg.tagaini.net/
+https://creativecommons.org/licenses/by-sa/3.0/
+
+漢字の構造テーブルの生成に使用しています。
+  data/structure.tsv
+  src/generated/structure.ts
+
+--------------------------------------------------------------------------------
+Unicode Character Database
+--------------------------------------------------------------------------------
+Copyright (c) 1991-2026 Unicode, Inc. All rights reserved.
+Distributed under the Unicode License.
+https://www.unicode.org/copyright.html
+
+旧字体（異体字）テーブル、常用漢字リスト、JIS X 0208 の文字集合の生成に使用しています。
+  data/variant.tsv
+  data/joyo.tsv
+  data/legible.tsv
+  src/generated/variant.ts
+  src/generated/legible.ts
