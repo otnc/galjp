@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run ci
@@ -52,7 +52,7 @@ jobs:
           NEW="$(node -p "require('./package.json').version")"
           node -e "
             const fs = require('fs');
-            const p = 'src/cli/run.ts';
+            const p = 'src/cli/program.ts';
             const s = fs.readFileSync(p, 'utf8').replace(/export const VERSION = '[^']*';/, \"export const VERSION = '\" + process.argv[1] + \"';\");
             fs.writeFileSync(p, s);
           " "$NEW"

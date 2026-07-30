@@ -6,8 +6,8 @@ If anything here is unclear, opening an issue to ask is welcome.
 
 ## Getting set up
 
-You'll need Node.js >= 18 (the data scripts need >= 22, which runs TypeScript
-directly). Then:
+You'll need Node.js >= 22: the data scripts are TypeScript run directly by
+node, and that is the version CI uses. Then:
 
 ```sh
 npm install
