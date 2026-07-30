@@ -85,5 +85,8 @@
     "tsup": "^8.3.5",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.15.0"
+  },
+  "bin": {
+    "galjp": "./dist/cli.js"
   }
 }
