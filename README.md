@@ -230,7 +230,7 @@ Measured with `npm run coverage:report`:
 | 常用漢字 (2140)   | 54.3%        | **73.2%**            | 75.5%        |
 | JIS X 0208 (6355) | 58.3%        | **77.7%**            | 80.0%        |
 
-Bundle: 86.6 KB raw, 40.1 KB gzip. Kanji tables are built on first use, so text
+Bundle: 86.1 KB raw, 40.1 KB gzip. Kanji tables are built on first use, so text
 without kanji never pays for them.
 
 ## Migrating from v4

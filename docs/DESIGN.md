@@ -1334,7 +1334,7 @@ galjp/
 
 ### 15.4 バンドルサイズ
 
-`dist/index.js` は **86.6 KB raw / 40.1 KB gzip**（目標 25 KB gzip）。内訳は構造テーブル 62 KB、
+`dist/index.js` は **86.1 KB raw / 40.1 KB gzip**（目標 25 KB gzip）。内訳は構造テーブル 62 KB、
 かな・英数表と実装コード約 20 KB、legible 3.5 KB、異体字 0.5 KB。
 
 実装中に 2 段階削減した:
@@ -1342,7 +1342,7 @@ galjp/
 1. **esbuild の `charset` を `utf8` に変更** — 既定の `ascii` は CJK を `\uXXXX`（6 バイト）に展開しており、
    これだけで 182 KB → 101 KB になった。`tsup` のトップレベル `charset` は無効で、
    `esbuildOptions` 経由でないと効かない
-2. **`legible` の限定**（C5）— 101 KB → 86.6 KB
+2. **`legible` の限定**（C5）— 101 KB → 86.1 KB
 
 これ以上は構造テーブル本体の圧縮（部品を ASCII インデックス化するなど）が必要だが、
 gzip が既に重複を吸収しており費用対効果が低い。**目標値のほうを実測に合わせて 45 KB gzip に改める。**
