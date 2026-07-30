@@ -76,6 +76,9 @@
     "url": "https://github.com/otnc/galjp/issues"
   },
   "homepage": "https://github.com/otnc/galjp#readme",
+  "dependencies": {
+    "commander": "^13.1.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
     "@types/jest": "^29.5.14",

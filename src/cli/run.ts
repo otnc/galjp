@@ -1,38 +1,9 @@
+import { CommanderError } from 'commander';
 import { createConverter } from '../converter';
-import { DATA_META } from '../generated/meta';
-import { LAYER_IDS, type GaljpOptions } from '../types';
-import { parseArgs, UsageError } from './args';
+import type { GaljpOptions } from '../types';
+import { buildProgram, toGaljpOptions, VERSION, type CliOptions } from './program';
 
-export const VERSION = '5.0.0';
-
-export const HELP = `galjp ${VERSION} — ギャル文字 converter
-
-Usage
-  galjp [options] [text...]
-  <stdin> | galjp [options]
-
-Examples
-  galjp 信頼してる                      ｲ言束頁Ｕτゑ
-  galjp 学校                            學木交
-  galjp --split-policy aggressive 男女
-  echo 信頼してる | galjp
-  galjp --explain 湾
-
-Options
-  -p, --split-policy <policy>  horizontal | balanced (default) | aggressive
-  -s, --seed <seed>            seed for candidate selection
-  -d, --max-depth <n>          kanji recursion limit (default 2)
-      --only <layers>          convert only these comma-separated layers
-      --no-<layer>             skip a layer (${LAYER_IDS.join(', ')})
-      --no-variant             do not substitute traditional forms (学 → 學)
-      --no-style-standalone    do not decorate single-component kanji (口 → ﾛ)
-      --no-preserve            also convert URLs and emoji
-  -e, --explain                show how each character was converted
-  -h, --help                   show this help
-  -v, --version                show the version
-
-Data: ${DATA_META.structureEntries} kanji structures, ${DATA_META.variantEntries} variants.
-`;
+export { VERSION };
 
 /** Injected so tests can drive the CLI without touching the real process. */
 export interface CliIo {
@@ -55,43 +26,50 @@ function explainText(input: string, options: GaljpOptions): string {
 }
 
 export async function run(argv: readonly string[], io: CliIo): Promise<number> {
-  let parsed;
-  try {
-    parsed = parseArgs(argv);
-  } catch (error) {
-    if (!(error instanceof UsageError)) throw error;
-    io.stderr(`galjp: ${error.message}\n\nRun \`galjp --help\` for usage.\n`);
-    return 2;
-  }
+  const program = buildProgram();
 
-  if (parsed.help) {
-    io.stdout(HELP);
-    return 0;
-  }
-  if (parsed.version) {
-    io.stdout(`${VERSION}\n`);
-    return 0;
+  // Commander would otherwise write straight to the real streams and call
+  // process.exit, which makes it untestable and steals our exit codes.
+  program.exitOverride().configureOutput({
+    writeOut: (s) => io.stdout(s),
+    writeErr: (s) => io.stderr(s),
+  });
+
+  let text: string[];
+  let cli: CliOptions;
+  try {
+    program.parse(argv, { from: 'user' });
+    text = program.processedArgs[0] as string[];
+    cli = program.opts<CliOptions>();
+  } catch (error) {
+    if (!(error instanceof CommanderError)) throw error;
+    // --help and --version are reported as errors with exit code 0.
+    return error.exitCode;
   }
 
   let input: string;
-  if (parsed.text.length > 0) {
-    input = parsed.text.join(' ');
+  if (text.length > 0) {
+    input = text.join(' ');
   } else if (io.isInteractive) {
     // Nothing piped and nothing to convert: show help instead of hanging.
-    io.stdout(HELP);
+    // outputHelp rather than helpInformation, so this matches `--help` exactly
+    // — helpInformation omits the text added with addHelpText.
+    program.outputHelp();
     return 0;
   } else {
     input = await io.readStdin();
   }
 
   try {
-    if (parsed.explain) {
-      const report = explainText(input, parsed.options);
+    const options = toGaljpOptions(cli);
+
+    if (cli.explain) {
+      const report = explainText(input, options);
       if (report.length > 0) io.stdout(`${report}\n`);
       return 0;
     }
 
-    const converter = createConverter(parsed.options);
+    const converter = createConverter(options);
     // Convert line by line so `preserve` patterns cannot span a newline, and
     // keep the input's trailing-newline shape.
     const trailing = input.endsWith('\n') ? '' : '\n';
