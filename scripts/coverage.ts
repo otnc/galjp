@@ -21,7 +21,12 @@ type MeasureCoverage = (
   options?: Record<string, unknown>,
 ) => CoverageReport;
 
-const { measureCoverage } = (await import('../dist/index.js')) as unknown as {
+// `dist/` is a build artifact that may not exist yet (e.g. during
+// `tsc --noEmit`), and its declarations are hand-modelled above anyway, so the
+// specifier is kept in a variable — a literal string would make tsc resolve
+// module types for it and fail typecheck on a clean checkout.
+const distIndex = '../dist/index.js';
+const { measureCoverage } = (await import(distIndex)) as unknown as {
   measureCoverage: MeasureCoverage;
 };
 
