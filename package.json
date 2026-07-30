@@ -36,6 +36,13 @@
     "check": "prettier --write . && eslint --fix .",
     "ci": "prettier --check . && eslint .",
     "typecheck": "tsc --noEmit",
+    "data:fetch": "node scripts/fetch-sources.ts",
+    "data:structure": "node scripts/extract-structure.ts",
+    "data:legible": "node scripts/build-legible.ts",
+    "data:port": "node scripts/port-v4-tables.ts",
+    "data:build": "node scripts/build-tables.ts",
+    "data:all": "npm run data:structure && npm run data:legible && npm run data:build",
+    "coverage:report": "node scripts/coverage.ts",
     "prepublishOnly": "npm run build"
   },
   "repository": {
