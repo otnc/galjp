@@ -1,7 +1,7 @@
 {
   "name": "galjp",
   "version": "5.0.0",
-  "description": "≠”兯儿文字変ｵ奐ラィ┐”ラױ",
+  "description": "≠”兯儿亠ﾒウ子亦夂ｵ奐ラィ┐”ラױ",
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -15,6 +15,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "galjp": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "NOTICE",
@@ -85,8 +88,5 @@
     "tsup": "^8.3.5",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.15.0"
-  },
-  "bin": {
-    "galjp": "./dist/cli.js"
   }
 }

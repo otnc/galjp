@@ -1,0 +1,33 @@
+galjp
+Copyright (c) otoneko.
+Licensed under the ISC License (see LICENSE).
+
+This product includes data derived from the following third-party sources.
+The licences below apply to the derived data files, not to galjp's own code.
+
+--------------------------------------------------------------------------------
+KanjiVG
+--------------------------------------------------------------------------------
+Copyright (c) 2009-2026 Ulrich Apel.
+Licensed under the Creative Commons Attribution-Share Alike 3.0 licence.
+https://kanjivg.tagaini.net/
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Used to build the kanji structure table:
+  data/structure.tsv
+  src/generated/structure.ts
+
+--------------------------------------------------------------------------------
+Unicode Character Database
+--------------------------------------------------------------------------------
+Copyright (c) 1991-2026 Unicode, Inc. All rights reserved.
+Distributed under the Unicode License.
+https://www.unicode.org/copyright.html
+
+Used to build the traditional-variant table, the 常用漢字 list and the
+JIS X 0208 character set:
+  data/variant.tsv
+  data/joyo.tsv
+  data/legible.tsv
+  src/generated/variant.ts
+  src/generated/legible.ts
