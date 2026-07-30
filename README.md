@@ -2,8 +2,10 @@
 
 ≠”兯儿亠ﾒウ子亦夂ｵ奐ラィ┐”ラױ — a galmoji (ギャル文字) converter for JavaScript.
 
-Works in browsers, Node.js, Deno, Bun and Cloudflare Workers. No dependencies,
-no Node built-ins, ESM and CJS, TypeScript types and a CLI included.
+Works in browsers, Node.js, Deno, Bun and Cloudflare Workers. The library uses
+no Node built-ins and pulls in nothing at runtime; ESM and CJS, TypeScript types
+and a CLI included. (The CLI uses `commander`; importing the library never
+loads it.)
 
 ```bash
 npm install galjp
@@ -57,21 +59,14 @@ galjp('まじ卍', { dictionary: { まじ: 'маＵ”' } }); // 'маＵ”卍'
 
 ### Reusing a converter
 
-`createConverter` resolves options and builds tables once — prefer it in loops.
+`createConverter` resolves options and builds the tables once — prefer it in a
+loop. See [API](#api) for the full surface.
 
 ```ts
 import { createConverter } from 'galjp';
 
 const conv = createConverter({ splitPolicy: 'aggressive' });
 for (const line of lines) console.log(conv.convert(line));
-```
-
-`explain()` reports which of the five kanji routes fired, which is the fastest
-way to understand or report a surprising result:
-
-```ts
-conv.explain('湾'); // { route: 'decompose', steps: ['湾', '灣', …] }
-conv.explain('川'); // { route: 'override',  steps: ['川', '丿丨丨'] }
 ```
 
 ## CLI
@@ -83,19 +78,122 @@ echo 信頼してる | galjp
 galjp --explain 湾         # 湾  decompose   湾 → 灣 → ｼ彎
 ```
 
-| Flag                          | Description                                        |
-| ----------------------------- | -------------------------------------------------- |
-| `-p, --split-policy <policy>` | `horizontal` / `balanced` (default) / `aggressive` |
-| `-s, --seed <seed>`           | Seed for candidate selection                       |
-| `-d, --max-depth <n>`         | Kanji recursion limit                              |
-| `--only <layers>`             | Convert only these comma-separated layers          |
-| `--no-<layer>`                | Skip a layer, e.g. `--no-kanji`                    |
-| `--no-variant`                | Do not substitute traditional forms                |
-| `--no-style-standalone`       | Do not decorate single-component kanji             |
-| `--no-preserve`               | Also convert URLs and emoji                        |
-| `-e, --explain`               | Show how each character was converted              |
+Reads stdin when given no text, so it composes with pipes. `galjp --version`
+prints the version, `galjp --help` prints the following.
+
+<!-- Keep in step with `galjp --help`. -->
+
+```
+Usage: galjp [options] [text...]
+
+ギャル文字 (galmoji) converter.
 
 Reads stdin when given no text, so it composes with pipes.
+
+Arguments:
+  text                         text to convert
+
+Options:
+  -v, --version                output the version number
+  -p, --split-policy <policy>  how far a kanji may be taken apart (choices:
+                               "horizontal", "balanced", "aggressive", default:
+                               "balanced")
+  -s, --seed <seed>            seed for candidate selection (deterministic
+                               without one)
+  -d, --max-depth <n>          kanji decomposition recursion limit
+  --only <layers>              convert only these layers (latin, digit,
+                               hiragana, katakana, kanji, symbol)
+  -e, --explain                show the route and steps for each character
+  --no-variant                 do not substitute traditional forms (学 → 學)
+  --no-style-standalone        do not decorate single-component kanji (口 → ﾛ)
+  --no-preserve                also convert URLs and emoji
+  --no-latin                   skip the latin layer
+  --no-digit                   skip the digit layer
+  --no-hiragana                skip the hiragana layer
+  --no-katakana                skip the katakana layer
+  --no-kanji                   skip the kanji layer
+  --no-symbol                  skip the symbol layer
+  -h, --help                   display help for command
+
+Examples:
+  $ galjp 信頼してる                       ｲ言束頁Ｕτゑ
+  $ galjp 学校                             學木交
+  $ galjp -p aggressive 男女               田ｶ女
+  $ echo 信頼してる | galjp
+  $ galjp --explain 湾                     湾  decompose  湾 → 灣 → ｼ彎
+
+Data: 5129 kanji structures, 81 traditional-form pairs.
+```
+
+## API
+
+### `galjp(input, options?): string`
+
+Convert a string. Returns `''` for `''`, and throws `TypeError` for anything
+that is not a string. With no `options` it reuses a shared converter; with
+`options` it builds a new one per call, so prefer `createConverter` in a loop.
+
+```ts
+galjp('信頼してる'); // 'ｲ言束頁Ｕτゑ'
+galjp('男女', { splitPolicy: 'horizontal' }); // '男女'
+```
+
+### `createConverter(options?): Converter`
+
+Resolve options and build the lookup tables once.
+
+```ts
+interface Converter {
+  /** Convert a string. */
+  convert(input: string): string;
+  /** Every rendering this configuration could produce for one character. */
+  candidates(char: string): readonly string[];
+  /** Which route converted a character, and the intermediate forms. */
+  explain(char: string): Explanation;
+  /** The options after defaults are filled in. */
+  readonly options: Readonly<ResolvedOptions>;
+}
+
+interface Explanation {
+  route: 'override' | 'homoglyph' | 'variant' | 'decompose' | 'style' | 'none';
+  result: string;
+  /** e.g. ['湾', '灣', 'ｼ彎'] */
+  steps: readonly string[];
+}
+```
+
+`explain()` is the fastest way to understand — or report — a surprising result:
+
+```ts
+const conv = createConverter();
+conv.explain('湾'); // { route: 'decompose', result: 'ｼ彎', steps: ['湾', '灣', 'ｼ彎'] }
+conv.explain('川'); // { route: 'override',  result: '丿丨丨', steps: ['川', '丿丨丨'] }
+conv.explain('★'); // { route: 'none',      result: '★',    steps: ['★'] }
+conv.candidates('あ'); // ['क॑']
+```
+
+### `measureCoverage(chars, options?): CoverageReport`
+
+How much of a character set a configuration can convert. Used by the CI gate.
+
+```ts
+measureCoverage('日本語漢字');
+// { total: 5, converted: 3, ratio: 0.6,
+//   byRoute: { decompose: 2, homoglyph: 1, none: 2, override: 0, variant: 0, style: 0 } }
+```
+
+### `resolveOptions(options?): ResolvedOptions`
+
+Validate and fill in defaults without building a converter. Throws `TypeError`
+naming the offending key.
+
+### Other exports
+
+| Export                                                                                                                  | What it is                                   |
+| ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `LAYER_IDS`                                                                                                             | The six layer names, in order                |
+| `DATA_META`                                                                                                             | Table sizes and a hash of the generated data |
+| `GaljpOptions`, `ResolvedOptions`, `Converter`, `Explanation`, `LayerId`, `SplitPolicy`, `KanjiRoute`, `CoverageReport` | Types                                        |
 
 ## How kanji conversion works
 
