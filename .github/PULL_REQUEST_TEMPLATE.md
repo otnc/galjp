@@ -1,39 +1,39 @@
-## Summary
+## 概要
 
-<!-- Select which applies to your request type. -->
+<!-- 該当するものを選んでください。 -->
 
-- [ ] Fix bug(s)
-- [ ] New feature(s)
-- [ ] Conversion data (component styles, overrides, variants)
-- [ ] Others
+- [ ] 不具合の修正
+- [ ] 新機能
+- [ ] 変換データ（部品スタイル、例外、異体字）
+- [ ] その他
 
-<!-- Please write a brief summary of your request. -->
+<!-- 変更内容を簡潔に書いてください。 -->
 
-## Why?
+## なぜ必要か
 
-<!-- Please include the reason for your request and a detailed description of your request. -->
+<!-- この変更が必要な理由と、詳しい内容を書いてください。 -->
 
-## Related issue(s)
+## 関連する issue
 
-<!-- If there are any related issue(s), would you like to close them? -->
+<!-- 関連する issue があれば、クローズしますか？ -->
 
 closes
 
-## Check
+## チェック
 
-<!-- Please complete the following checks before submitting. -->
+<!-- 送信前に、以下を確認してください。 -->
 
-- [ ] Check if duplicate PR(s) already exist.
-- [ ] Read `CONTRIBUTING.md` (rules)
-- [ ] Run `npm run check` (lint & format)
-- [ ] Run `npm test` (functions test)
-- [ ] Run `npm run build` (`dist/`)
-- [ ] (optional) Run `npm run test:coverage` and check nothing new went uncovered
+- [ ] 重複する PR がないか確認した
+- [ ] `CONTRIBUTING.md`（規約）を読んだ
+- [ ] `npm run check`（lint と format）を実行した
+- [ ] `npm test`（テスト）を実行した
+- [ ] `npm run build`（`dist/`）を実行した
+- [ ] （任意）`npm run test:coverage` を実行し、新たにカバーされていない箇所がないか確認した
 
-### If you changed conversion data
+### 変換データを変更した場合
 
-<!-- data/*.ts, or anything under scripts/ that regenerates data/*.tsv -->
+<!-- data/*.ts、または data/*.tsv を再生成する scripts/ 配下のファイル -->
 
-- [ ] Ran `npm run data:build` and committed the regenerated `src/generated/`
-- [ ] Ran `npm run build && npm run coverage:report` and the conversion rate did not drop
-- [ ] Explained the reasoning in the source comments, not just here
+- [ ] `npm run data:build` を実行し、再生成した `src/generated/` をコミットした
+- [ ] `npm run build && npm run coverage:report` を実行し、変換率が下がっていないことを確認した
+- [ ] ここだけでなく、ソースコードのコメントにも理由を書いた

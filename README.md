@@ -1,17 +1,14 @@
 # galjp
 
-≠”兯儿亠ﾒウ子亦夂ｵ奐ラィ┐”ラױ — a galmoji (ギャル文字) converter for JavaScript.
+≠”兯儿亠ﾒウ子亦夂ｵ奐ラィ┐”ラױ — JavaScript 向けのギャル文字変換ライブラリ。
 
-Works in browsers, Node.js, Deno, Bun and Cloudflare Workers. The library uses
-no Node built-ins and pulls in nothing at runtime; ESM and CJS, TypeScript types
-and a CLI included. (The CLI uses `commander`; importing the library never
-loads it.)
+ブラウザ、Node.js、Deno、Bun、Cloudflare Workers で動作します。ライブラリ本体は Node.js 固有の API を使わず、実行時に何も依存しません。ESM と CJS の両方、TypeScript の型定義、CLI を同梱しています（CLI は `commander` を使いますが、ライブラリ本体をインポートしても読み込まれません）。
 
 ```bash
 npm install galjp
 ```
 
-## Usage
+## 使い方
 
 ```ts
 import { galjp } from 'galjp';
@@ -23,14 +20,14 @@ galjp('男女'); // '田ｶ女'
 galjp('学校'); // '學木交'
 ```
 
-URLs and emoji are left alone by default:
+URL と絵文字は既定で変換されません。
 
 ```ts
 galjp('見て https://example.com/A だよ😀');
 // '見τ https://example.com/A ﾅﾆ”ょ😀'
 ```
 
-### Options
+### オプション
 
 ```ts
 galjp('信頼してる', { layers: { kanji: false } }); // '信頼Ｕτゑ'
@@ -38,29 +35,28 @@ galjp('男女', { splitPolicy: 'horizontal' }); // '男女'
 galjp('まじ卍', { dictionary: { まじ: 'маＵ”' } }); // 'маＵ”卍'
 ```
 
-| Option            | Default      | Description                                                                |
-| ----------------- | ------------ | -------------------------------------------------------------------------- |
-| `layers`          | all on       | Enable/disable `latin`, `digit`, `hiragana`, `katakana`, `kanji`, `symbol` |
-| `splitPolicy`     | `'balanced'` | How far kanji may be taken apart — see below                               |
-| `variant`         | `true`       | Substitute traditional forms (`学` → `學`)                                 |
-| `styleStandalone` | `true`       | Decorate single-component kanji (`口` → `ﾛ`)                               |
-| `maxDepth`        | `2`          | Recursion limit when decomposing                                           |
-| `seed`            | —            | Seed for candidate selection; deterministic without one                    |
-| `preserve`        | URLs + emoji | `RegExp`, `RegExp[]`, a predicate, or `false`                              |
-| `dictionary`      | `{}`         | Literal (never regex) replacements, applied first                          |
+| オプション        | 既定値       | 説明                                                                           |
+| ----------------- | ------------ | ------------------------------------------------------------------------------ |
+| `layers`          | 全て有効     | `latin` `digit` `hiragana` `katakana` `kanji` `symbol` の有効/無効を切り替える |
+| `splitPolicy`     | `'balanced'` | 漢字をどこまで分解するか（下記参照）                                           |
+| `variant`         | `true`       | 旧字体へ置き換える（`学` → `學`）                                              |
+| `styleStandalone` | `true`       | 分解できない単体の漢字を装飾する（`口` → `ﾛ`）                                 |
+| `maxDepth`        | `2`          | 分解時の再帰の上限                                                             |
+| `seed`            | なし         | 候補選択のシード。未指定なら決定的な出力になる                                 |
+| `preserve`        | URL と絵文字 | `RegExp`、`RegExp[]`、述語関数、または `false`                                 |
+| `dictionary`      | `{}`         | 最初に適用されるリテラル置換（正規表現としては解釈しない）                     |
 
-### Split policy
+### 分割方針（splitPolicy）
 
-| Value          | Left/right | Top/bottom                     | Enclosures | Example      |
-| -------------- | ---------- | ------------------------------ | ---------- | ------------ |
-| `'horizontal'` | ✅         | —                              | —          | `男` → `男`  |
-| `'balanced'`   | ✅         | when both halves stay readable | —          | `男` → `田ｶ` |
-| `'aggressive'` | ✅         | ✅                             | ✅         | `凶` → `凵ﾒ` |
+| 値             | 左右分割 | 上下分割                     | 囲み構造 | 例           |
+| -------------- | -------- | ---------------------------- | -------- | ------------ |
+| `'horizontal'` | ✅       | —                            | —        | `男` → `男`  |
+| `'balanced'`   | ✅       | 両方のパーツが読めるときのみ | —        | `男` → `田ｶ` |
+| `'aggressive'` | ✅       | ✅                           | ✅       | `凶` → `凵ﾒ` |
 
-### Reusing a converter
+### コンバータを再利用する
 
-`createConverter` resolves options and builds the tables once — prefer it in a
-loop. See [API](#api) for the full surface.
+`createConverter` はオプションの解決とテーブルの構築を一度だけ行います。ループの中では `galjp()` よりこちらを使ってください。詳しくは [API](#api) を参照してください。
 
 ```ts
 import { createConverter } from 'galjp';
@@ -78,8 +74,7 @@ echo 信頼してる | galjp
 galjp --explain 湾         # 湾  decompose   湾 → 灣 → ｼ彎
 ```
 
-Reads stdin when given no text, so it composes with pipes. `galjp --version`
-prints the version, `galjp --help` prints the following.
+テキストを渡さずに実行すると標準入力を読むので、パイプと組み合わせられます。`galjp --version` でバージョンを、`galjp --help` で以下のヘルプを表示します（オプションの説明は英語ですが、実際の `--help` の出力そのものです）。
 
 <!-- Keep in step with `galjp --help`. -->
 
@@ -125,13 +120,27 @@ Examples:
 Data: 5129 kanji structures, 81 traditional-form pairs.
 ```
 
+主なオプションの対訳は次のとおりです。
+
+| フラグ                        | 説明                                                                                     |
+| ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `-v, --version`               | バージョンを表示する                                                                     |
+| `-p, --split-policy <policy>` | 漢字をどこまで分解するか（`horizontal` / `balanced` / `aggressive`）                     |
+| `-s, --seed <seed>`           | 候補選択のシード（未指定なら決定的）                                                     |
+| `-d, --max-depth <n>`         | 分解時の再帰の上限                                                                       |
+| `--only <layers>`             | 指定したレイヤーだけを変換する                                                           |
+| `-e, --explain`               | 各文字がどの経路で変換されたかを表示する                                                 |
+| `--no-variant`                | 旧字体への置換をしない（`学` → `學` をしない）                                           |
+| `--no-style-standalone`       | 単体の漢字を装飾しない（`口` → `ﾛ` をしない）                                            |
+| `--no-preserve`               | URL や絵文字も変換する                                                                   |
+| `--no-<layer>`                | 指定したレイヤーをスキップする（`latin` `digit` `hiragana` `katakana` `kanji` `symbol`） |
+| `-h, --help`                  | ヘルプを表示する                                                                         |
+
 ## API
 
 ### `galjp(input, options?): string`
 
-Convert a string. Returns `''` for `''`, and throws `TypeError` for anything
-that is not a string. With no `options` it reuses a shared converter; with
-`options` it builds a new one per call, so prefer `createConverter` in a loop.
+文字列を変換します。`''` を渡すと `''` を返し、文字列以外を渡すと `TypeError` を投げます。`options` を省略した場合は共有のコンバータを再利用し、`options` を渡した場合は呼び出しごとに新しいコンバータを作るので、ループ内では `createConverter` を使ってください。
 
 ```ts
 galjp('信頼してる'); // 'ｲ言束頁Ｕτゑ'
@@ -140,29 +149,29 @@ galjp('男女', { splitPolicy: 'horizontal' }); // '男女'
 
 ### `createConverter(options?): Converter`
 
-Resolve options and build the lookup tables once.
+オプションを解決し、変換テーブルを一度だけ構築します。
 
 ```ts
 interface Converter {
-  /** Convert a string. */
+  /** 文字列を変換する */
   convert(input: string): string;
-  /** Every rendering this configuration could produce for one character. */
+  /** この設定で1文字が取りうる変換候補をすべて返す */
   candidates(char: string): readonly string[];
-  /** Which route converted a character, and the intermediate forms. */
+  /** 1文字がどの経路で変換されたか、その途中経過を返す */
   explain(char: string): Explanation;
-  /** The options after defaults are filled in. */
+  /** 既定値を適用した後のオプション */
   readonly options: Readonly<ResolvedOptions>;
 }
 
 interface Explanation {
   route: 'override' | 'homoglyph' | 'variant' | 'decompose' | 'style' | 'none';
   result: string;
-  /** e.g. ['湾', '灣', 'ｼ彎'] */
+  /** 例: ['湾', '灣', 'ｼ彎'] */
   steps: readonly string[];
 }
 ```
 
-`explain()` is the fastest way to understand — or report — a surprising result:
+`explain()` は、変換結果に納得できないときに原因を突き止める一番手っ取り早い方法です。
 
 ```ts
 const conv = createConverter();
@@ -174,7 +183,7 @@ conv.candidates('あ'); // ['क॑']
 
 ### `measureCoverage(chars, options?): CoverageReport`
 
-How much of a character set a configuration can convert. Used by the CI gate.
+ある文字集合のうち、どれだけを変換できるかを計測します。CI のゲートにも使っています。
 
 ```ts
 measureCoverage('日本語漢字');
@@ -184,91 +193,80 @@ measureCoverage('日本語漢字');
 
 ### `resolveOptions(options?): ResolvedOptions`
 
-Validate and fill in defaults without building a converter. Throws `TypeError`
-naming the offending key.
+コンバータを作らずに、オプションの検証と既定値の補完だけを行います。不正な値を渡すと、該当するキー名を含む `TypeError` を投げます。
 
-### Other exports
+### その他のエクスポート
 
-| Export                                                                                                                  | What it is                                   |
-| ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `LAYER_IDS`                                                                                                             | The six layer names, in order                |
-| `DATA_META`                                                                                                             | Table sizes and a hash of the generated data |
-| `GaljpOptions`, `ResolvedOptions`, `Converter`, `Explanation`, `LayerId`, `SplitPolicy`, `KanjiRoute`, `CoverageReport` | Types                                        |
+| エクスポート                                                                                                            | 内容                                       |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `LAYER_IDS`                                                                                                             | 6つのレイヤー名（順序付き）                |
+| `DATA_META`                                                                                                             | 各テーブルの件数と、生成データのハッシュ値 |
+| `GaljpOptions`, `ResolvedOptions`, `Converter`, `Explanation`, `LayerId`, `SplitPolicy`, `KanjiRoute`, `CoverageReport` | 型定義                                     |
 
-## How kanji conversion works
+## 漢字変換の仕組み
 
-Rather than storing a hand-written result for every kanji, galjp stores
-**where a character splits** and **how each component is written**, then
-combines them:
+galjp は、漢字ごとに変換結果を手書きで持つのではなく、**どこで分割するか**と**各部品をどう書くか**を別々に保存し、それを組み合わせます。
 
 ```
-信 → ⿰(亻, 言)      structure, derived from KanjiVG
-亻 → ｲ               style map, ~20 hand-written entries
+信 → ⿰(亻, 言)      構造（KanjiVG から生成）
+亻 → ｲ               スタイルマップ（手書き・約20件）
 ─────────────────
         ｲ言
 ```
 
-Each kanji is tried against five routes in order:
+1文字の漢字は、次の5つの経路を順番に試します。
 
-1. **override** — stroke-level splits no component data can express (`川` → `丿丨丨`)
-2. **homoglyph** — whole-character look-alikes (`中` → `㊥`)
-3. **variant** — swap in the traditional form, then keep going (`湾` → `灣` → …)
-4. **decompose** — split into components (`信` → `ｲ言`)
-5. **style** — decorate a kanji that cannot be split (`口` → `ﾛ`)
+1. **override** — 部品データでは表現できない、筆画レベルの分解（`川` → `丿丨丨`）
+2. **homoglyph** — 分解ではなく、見た目の似た別の文字への置換（`中` → `㊥`）
+3. **variant** — 旧字体に置き換えたうえで、さらに変換を続ける（`湾` → `灣` → …）
+4. **decompose** — 部品に分解する（`信` → `ｲ言`）
+5. **style** — 分解できない漢字を装飾する（`口` → `ﾛ`）
 
-Because routes 3–5 share one style map, editing a single line changes every
-character using that component: `亻` alone reaches about 190 kanji.
+経路3〜5は同じスタイルマップを共有しているため、1行変更するだけでその部品を使うすべての漢字に反映されます。たとえば `亻` を1行変えるだけで、約190字の漢字に影響します。
 
-See [docs/DESIGN.md](docs/DESIGN.md) for the full design.
+設計の詳細は [docs/DESIGN.md](docs/DESIGN.md)（日本語）を参照してください。
 
-## Coverage
+## 変換率
 
-Measured with `npm run coverage:report`:
+`npm run coverage:report` で計測した値です。
 
-| Character set     | `horizontal` | `balanced` (default) | `aggressive` |
-| ----------------- | ------------ | -------------------- | ------------ |
-| 常用漢字 (2140)   | 54.3%        | **73.2%**            | 75.5%        |
-| JIS X 0208 (6355) | 58.3%        | **77.7%**            | 80.0%        |
+| 対象文字集合         | `horizontal` | `balanced`（既定） | `aggressive` |
+| -------------------- | ------------ | ------------------ | ------------ |
+| 常用漢字（2140字）   | 54.3%        | **73.2%**          | 75.5%        |
+| JIS X 0208（6355字） | 58.3%        | **77.7%**          | 80.0%        |
 
-Bundle: 86.1 KB raw, 40.1 KB gzip. Kanji tables are built on first use, so text
-without kanji never pays for them.
+バンドルサイズは 86.1 KB（raw）/ 40.1 KB（gzip）です。漢字テーブルは実際に漢字が使われたときに初めて構築されるため、漢字を含まないテキストではその分のコストがかかりません。
 
-## Migrating from v4
+## v4 からの移行
 
-v4's `generate()` is gone; there is no compatibility shim.
+v4 の `generate()` は廃止され、互換用のラッパーもありません。
 
 | v4                                              | v5                                                         |
 | ----------------------------------------------- | ---------------------------------------------------------- |
 | `const { generate } = require('galjp')`         | `import { galjp } from 'galjp'`                            |
 | `{ alphabet, number, hira, kata, other, word }` | `{ layers: { latin, digit, hiragana, katakana, symbol } }` |
-| `generate('')` threw                            | `galjp('')` returns `''`                                   |
-| built-in `word.json`                            | `dictionary` option (no built-in phrases)                  |
+| `generate('')` は例外を投げていた               | `galjp('')` は `''` を返す                                 |
+| 組み込みの `word.json`                          | `dictionary` オプション（組み込みの語句は無し）            |
 
-Kanji output has been rebuilt from scratch and differs throughout. Kana, latin,
-digit and symbol output is unchanged from v4 and is covered by a parity test.
-Two v4 bugs are fixed, so their output changes: `E` now gives `ヨ` rather than
-`∋` (it was being converted twice), and `部` gives `立ﾛ⻏` rather than `立ﾛ卩`.
+漢字の変換結果はゼロから作り直したため、全面的に変わっています。ひらがな・カタカナ・英数字・記号の変換結果は v4 から変更しておらず、パリティテストで担保しています。v4 のバグを2件修正した影響で出力が変わる箇所もあります。`E` は（二重変換されていた）`∋` ではなく `ヨ` になり、`部` は `立ﾛ卩` ではなく `立ﾛ⻏` になります。
 
-## Development
+## 開発
 
 ```bash
-npm run data:fetch    # download KanjiVG + Unihan into .cache/ (gitignored)
-npm run data:all      # regenerate data/ and src/generated/
-npm run build         # tsup -> dist/
-npm test              # jest
-npm run check         # prettier + eslint, writing fixes
+npm run data:fetch    # KanjiVG と Unihan を .cache/ にダウンロード（gitignore 対象）
+npm run data:all      # data/ と src/generated/ を再生成する
+npm run build         # tsup でビルド -> dist/
+npm test              # jest でテストを実行
+npm run check         # prettier と eslint を実行し、修正を書き込む
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) — especially if you want to change how a
-character converts, which is usually a one-line edit to `data/component-style.ts`.
+詳しくは [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。特に、文字の変換結果を変えたい場合は、たいてい `data/component-style.ts` を1行編集するだけで済みます。
 
-## Data sources and licence
+## データソースとライセンス
 
-The code is ISC. The generated tables are derived from third-party data:
+コード本体は ISC ライセンスです。生成されたテーブルは、次のサードパーティデータから作成しています。
 
-- **[KanjiVG](https://kanjivg.tagaini.net/)** © Ulrich Apel — CC BY-SA 3.0.
-  Supplies the structure table (`src/generated/structure.ts`).
-- **[Unicode Character Database](https://www.unicode.org/)** © Unicode, Inc. —
-  Unicode Licence. Supplies the variant table and the JIS X 0208 character set.
+- **[KanjiVG](https://kanjivg.tagaini.net/)** © Ulrich Apel — CC BY-SA 3.0。構造テーブル（`src/generated/structure.ts`）の元データです。
+- **[Unicode Character Database](https://www.unicode.org/)** © Unicode, Inc. — Unicode License。異体字テーブルと JIS X 0208 の文字集合の元データです。
 
-See [NOTICE](NOTICE).
+詳細は [NOTICE](NOTICE) を参照してください。

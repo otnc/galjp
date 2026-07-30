@@ -1,131 +1,107 @@
 # Contributing
 
-Thanks for your interest in improving galjp!
-This guide gets you set up and explains how the project is put together.
-If anything here is unclear, opening an issue to ask is welcome.
+galjp の改善に興味を持っていただきありがとうございます。このガイドでは開発環境の準備と、プロジェクトの構成を説明します。不明な点があれば、issue で質問していただいて構いません。
 
-## Getting set up
+## セットアップ
 
-You'll need Node.js >= 22: the data scripts are TypeScript run directly by
-node, and that is the version CI uses. Then:
+Node.js >= 22 が必要です（データ生成スクリプトが TypeScript を node で直接実行するため、その版が CI で使われています）。
 
 ```sh
 npm install
 ```
 
-## Scripts
+## スクリプト一覧
 
-| Command                   | What it does                                                             |
-| ------------------------- | ------------------------------------------------------------------------ |
-| `npm run build`           | Bundle ESM/CJS + type declarations + the CLI with tsup                   |
-| `npm test`                | Run the tests once with jest (`npm run test:watch` to keep them running) |
-| `npm run test:coverage`   | Run the tests with a coverage report                                     |
-| `npm run typecheck`       | Type-check with `tsc --noEmit`                                           |
-| `npm run format`          | Format the code, writing the fixes (Prettier)                            |
-| `npm run format:check`    | Check formatting without writing (Prettier)                              |
-| `npm run lint`            | Lint the code without writing fixes (ESLint)                             |
-| `npm run lint:fix`        | Lint the code, writing the fixes (ESLint)                                |
-| `npm run check`           | Format and lint, writing the fixes (Prettier + ESLint)                   |
-| `npm run ci`              | The same checks without writing — what CI runs                           |
-| `npm run coverage:report` | How many kanji each configuration converts, plus bundle size             |
+| コマンド                  | 内容                                                             |
+| ------------------------- | ---------------------------------------------------------------- |
+| `npm run build`           | tsup で ESM/CJS + 型定義 + CLI をビルドする                      |
+| `npm test`                | jest でテストを1回実行する（`npm run test:watch` で監視実行）    |
+| `npm run test:coverage`   | テストをカバレッジ計測付きで実行する                             |
+| `npm run typecheck`       | `tsc --noEmit` で型チェックする                                  |
+| `npm run format`          | Prettier でフォーマットし、修正を書き込む                        |
+| `npm run format:check`    | フォーマットを確認するだけで書き込まない                         |
+| `npm run lint`            | ESLint で確認するだけで修正を書き込まない                        |
+| `npm run lint:fix`        | ESLint で確認し、修正を書き込む                                  |
+| `npm run check`           | Prettier と ESLint の両方を実行し、修正を書き込む                |
+| `npm run ci`              | 書き込みを行わない同等のチェック（CI が実行するもの）            |
+| `npm run coverage:report` | 各設定でどれだけの漢字を変換できるかと、バンドルサイズを計測する |
 
-Before opening a pull request, make sure the full set passes:
+プルリクエストを送る前に、次を通してください。
 
 ```sh
 npm run ci && npm run typecheck && npm test && npm run build
 ```
 
-## How the project is laid out
+## プロジェクトの構成
 
 ```
-data/         input data — the `.ts` files are hand-written, the `.tsv` generated
-src/          the library (Web standards only, no Node APIs)
-src/cli/      the CLI (pure and testable); src/cli.ts is the executable
-src/generated/  generated tables — never edit by hand
-scripts/      data pipeline (Node-only, run with `node scripts/*.ts`)
-test/         jest tests
-docs/DESIGN.md  the full design, including why each decision was made
+data/           入力データ。`.ts` ファイルは手書き、`.tsv` は自動生成
+src/            ライブラリ本体（Web 標準のみ、Node API は使わない）
+src/cli/        CLI（純粋関数でテスト可能）。src/cli.ts が実行エントリ
+src/generated/  自動生成されたテーブル。手で編集しない
+scripts/        データ生成パイプライン（Node 専用。`node scripts/*.ts` で実行）
+test/           jest によるテスト
+docs/DESIGN.md  詳細設計書。各判断の理由も記載
 ```
 
-`docs/DESIGN.md` is the reference for anything non-obvious. Section 15 records
-what the implementation actually measured versus what was planned.
+自明でない点はすべて `docs/DESIGN.md` が拠り所です。特に §15 には、実装時に実測した値と当初の計画との差分を記録しています。
 
-## Changing conversion data
+## 変換データを変更する
 
-This is the most common kind of contribution, and the most valuable.
+もっとも多く、もっとも価値のある種類の貢献です。
 
-**Almost everything lives in `data/component-style.ts`.** It maps a component to
-its galmoji form, and it is shared by the decomposition, variant and standalone
-routes — so one line reaches every kanji using that component. Adding `艹: ['ﾅﾅ']`
-affects around 233 characters.
+**ほとんどの変更は `data/component-style.ts` で完結します。** このファイルは部品とギャル文字表記の対応表で、分解・異体字・単体装飾の3つの経路から共有されているため、1行変更するだけでその部品を使うすべての漢字に反映されます。たとえば `艹: ['ﾅﾅ']` を追加すると、約233字に影響します。
 
-The other hand-written files:
+その他の手書きファイルは次のとおりです。
 
-| File                     | For                                                                          |
-| ------------------------ | ---------------------------------------------------------------------------- |
-| `component-style.ts`     | How a component is written (`亻` → `ｲ`)                                      |
-| `component-normalize.ts` | Folding duplicate spellings of one radical (`⻌` → `辶`)                     |
-| `renderable.ts`          | Components that display fine but are not JIS X 0208 kanji                    |
-| `homoglyph.ts`           | Whole-character look-alikes (`中` → `㊥`)                                    |
-| `override.ts`            | Only things the algorithm cannot reach, e.g. stroke splits (`川` → `丿丨丨`) |
-| `variant-block.ts`       | Unihan variant pairs that are wrong for Japanese                             |
+| ファイル                 | 役割                                                                      |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `component-style.ts`     | 部品をどう書くか（`亻` → `ｲ`）                                            |
+| `component-normalize.ts` | 同じ部首の異なる表記をひとつにまとめる（`⻌` → `辶`）                     |
+| `renderable.ts`          | 表示はできるが JIS X 0208 の漢字ではない部品                              |
+| `homoglyph.ts`           | 分解ではなく、見た目の似た別の文字への置換（`中` → `㊥`）                 |
+| `override.ts`            | アルゴリズムでは導けないもの。たとえば筆画レベルの分解（`川` → `丿丨丨`） |
+| `variant-block.ts`       | 日本語としては誤りである Unihan の異体字ペア                              |
 
-After editing any of them:
+これらを編集したら、次を実行してください。
 
 ```sh
-npm run data:build                      # regenerate src/generated/
-npm run build && npm run coverage:report  # check the conversion rate did not drop
+npm run data:build                        # src/generated/ を再生成する
+npm run build && npm run coverage:report  # 変換率が下がっていないか確認する
 npm test
 ```
 
-Commit the regenerated `src/generated/` — CI checks it matches `data/`.
+再生成した `src/generated/` はコミットしてください。CI が `data/` との整合性を確認します。
 
-**Do not add to `override.ts` what the engine can already derive.** There is a
-test that fails if you do; the point is to keep hand-written exceptions from
-accumulating.
+**アルゴリズムがすでに導けるものを `override.ts` に追加しないでください。** そうした場合に失敗するテストがあります。手書きの例外が際限なく増えないようにするためです。
 
-### Regenerating from upstream
+### 元データから再生成する
 
-`data/structure.tsv` and `data/variant.tsv` come from KanjiVG and Unihan:
+`data/structure.tsv` と `data/variant.tsv` は、それぞれ KanjiVG と Unihan から生成しています。
 
 ```sh
-npm run data:fetch   # downloads into .cache/ (gitignored)
-npm run data:all     # regenerates data/ and src/generated/
+npm run data:fetch   # .cache/ にダウンロードする（gitignore 対象）
+npm run data:all     # data/ と src/generated/ を再生成する
 ```
 
-## Conventions
+## 規約
 
-- **Formatting is Prettier** and **linting is ESLint** (`eslint.config.mjs` —
-  `typescript-eslint`'s recommended rules, with `eslint-config-prettier`
-  disabling anything that conflicts with Prettier). `npm run check` handles both.
-- **Tests live in `test/`** as `*.test.ts` and run with jest.
-- **Comments and docs are in English** and kept brief. Explain _why_, not _what_ —
-  especially for conversion data, where the reasoning is the valuable part.
-- **Type-only imports use `import type`.**
-- **`src/` may not use Node APIs.** The library targets Web standards so it runs
-  in browsers and Workers; CI checks it under Deno and Bun. Node-only code
-  belongs in `src/cli.ts` or `scripts/`.
+- **フォーマットは Prettier、リントは ESLint** です（`eslint.config.mjs` は `typescript-eslint` の推奨ルールに、Prettier と衝突するルールを無効化する `eslint-config-prettier` を重ねています）。`npm run check` で両方まとめて実行できます。
+- **テストは `test/` 以下に** `*.test.ts` として置き、jest で実行します。
+- **ソースコード中のコメントは英語**で、簡潔にします。「何をしているか」ではなく「なぜそうしているか」を書いてください。特に変換データについては、その理由こそが価値のある情報です。README や CONTRIBUTING などの利用者向けドキュメントは日本語です。
+- **型のみの import には `import type` を使います。**
+- **`src/` 以下では Node API を使えません。** ライブラリは Web 標準のみを対象としており、ブラウザや Workers でも動作する必要があります。CI は Deno と Bun 上でも動作を確認します。Node 専用のコードは `src/cli.ts` や `scripts/` に置いてください。
 
-## Pull requests
+## プルリクエスト
 
-Keep each change focused and add tests for any new behaviour.
+変更は焦点を絞り、新しい挙動には対応するテストを追加してください。
 
-## Releasing (maintainers)
+## リリース（メンテナー向け）
 
-Releasing is one manual step. From the Actions tab, run the `release` workflow
-(`workflow_dispatch`) and give it a `version` input — either a bump keyword
-(`patch` / `minor` / `major` / `prerelease`) or an explicit version like `5.1.0`.
-The workflow runs the checks and build, bumps `package.json`, syncs the CLI's
-version string, publishes to npm with provenance via **trusted publishing**
-(OIDC — no `NPM_TOKEN` needed), pushes the version commit and tag, and creates a
-GitHub Release with generated notes.
+リリースは手動の1ステップです。Actions タブから `release` ワークフロー（`workflow_dispatch`）を実行し、`version` にバンプ用のキーワード（`patch` / `minor` / `major` / `prerelease`）か `5.1.0` のような具体的なバージョンを指定してください。ワークフローは各種チェックとビルドを実行し、`package.json` のバージョンを更新し、CLI が表示するバージョン文字列も同期させたうえで、**trusted publishing**（OIDC。`NPM_TOKEN` は不要）で npm に公開し、バージョンのコミットとタグを push し、生成されたリリースノート付きで GitHub Release を作成します。
 
-Trusted publishing must be configured once on npmjs.com: package
-**Settings → Publishing access → Trusted publishers → GitHub**, pointing at this
-repository's `release.yml` workflow.
+trusted publishing は npmjs.com 側で一度だけ設定が必要です。パッケージの **Settings → Publishing access → Trusted publishers → GitHub** から、このリポジトリの `release.yml` ワークフローを指定してください。
 
-## License
+## ライセンス
 
-By contributing, you agree that your contributions are licensed under the
-[ISC License](./LICENSE). Note that the generated data tables carry their own
-upstream licences — see [NOTICE](./NOTICE).
+このプロジェクトに貢献することで、あなたの貢献が [ISC License](./LICENSE) の下でライセンスされることに同意したものとします。なお、生成されたデータテーブルは元データ側のライセンスを引き継いでいます。詳しくは [NOTICE](./NOTICE) を参照してください。
