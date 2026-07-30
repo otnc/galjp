@@ -1,0 +1,48 @@
+name: 🈁 Conversion Report
+description: A character converts badly, or does not convert at all
+labels: [conversion]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for output you think is wrong or could be better — a kanji that
+        stays unconverted, a split that reads badly, or a variant substitution
+        that is wrong for Japanese.
+
+        `galjp --explain <text>` prints which route produced each character and
+        the intermediate steps, which usually points straight at the cause.
+  - type: input
+    attributes:
+      label: Input
+      placeholder: 学校
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: What galjp produces
+      placeholder: 學木交
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: What you would expect
+      placeholder: leave blank if you are unsure — reporting that it looks off is still useful
+  - type: textarea
+    attributes:
+      label: Output of `galjp --explain`
+      description: Paste the output. This is automatically formatted as code.
+      render: text
+  - type: dropdown
+    attributes:
+      label: Which options were you using?
+      multiple: true
+      options:
+        - defaults
+        - --split-policy horizontal
+        - --split-policy aggressive
+        - --no-variant
+        - --no-style-standalone
+        - other (describe below)
+  - type: textarea
+    attributes:
+      label: Additional information
