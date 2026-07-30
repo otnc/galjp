@@ -15,9 +15,18 @@ function makeIo(stdin = '', isInteractive = false) {
   return { io, stdout: () => out.join(''), stderr: () => err.join('') };
 }
 
-/** Parse argv the way run() does, without executing anything. */
+/**
+ * Parse argv the way run() does, without executing anything.
+ *
+ * configureOutput is required here even though nothing reads its output:
+ * without it, commander's default error writer prints straight to the real
+ * stderr before exitOverride throws, which is silent-but-noisy in CI logs for
+ * every "rejects ..." case below.
+ */
 function opts(argv: string[]): CliOptions {
-  const program = buildProgram().exitOverride();
+  const program = buildProgram()
+    .exitOverride()
+    .configureOutput({ writeOut: () => {}, writeErr: () => {} });
   program.parse(argv, { from: 'user' });
   return program.opts<CliOptions>();
 }

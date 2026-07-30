@@ -55,6 +55,11 @@ export function buildProgram(): Command {
 
   program
     .name('galjp')
+    // Commander wraps help text to `process.stdout.columns`, which makes the
+    // output depend on the terminal it happens to run in (a wide PowerShell
+    // window wraps differently from CI's non-TTY 80). Pin it so `--help` is
+    // identical everywhere, including the copy embedded in the README.
+    .configureHelp({ helpWidth: 80 })
     .description(
       'ギャル文字 (galmoji) converter.\n\nReads stdin when given no text, so it composes with pipes.',
     )
