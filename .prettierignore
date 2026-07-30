@@ -1,0 +1,7 @@
+dist
+node_modules
+.cache
+coverage
+lib
+data/*.tsv
+src/generated
